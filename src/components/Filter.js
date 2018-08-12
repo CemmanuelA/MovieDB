@@ -29,9 +29,9 @@ class Filter extends React.Component{
 
   handleSelectedChange(selectedOption) {
     this.setState({selectedOption});
-    const { source, url, apikey } = this.props;
-    const endPoint = (source == "movies") ? endpointMovies : endpointSeries;
-    const urlString = url + endPoint +"?api_key=" + apikey;
+    const { source, urlBase, apikey } = this.props;
+    const endPoint = (source === "movies") ? endpointMovies : endpointSeries;
+    const urlString = urlBase + endPoint +"?api_key=" + apikey;
     $.ajax({
       url:urlString,
       success: (result) =>{

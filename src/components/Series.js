@@ -5,9 +5,9 @@ import Filter from './Filter';
 import ItemList from './ItemList';
 
 
-const endpoint = "/discover/movie"
+const endpoint = "/discover/tv"
 
-class Movies extends React.Component {
+class Series extends React.Component {
 
 
 constructor(props){
@@ -40,7 +40,7 @@ constructor(props){
       success: (searchResult) => {
         console.log(searchResult)
         searchResult.results.forEach((item) =>{
-          const urlItem = urlBase + "/movie/" + item.id + "?api_key=" + apikey;
+          const urlItem = urlBase + "/tv/" + item.id + "?api_key=" + apikey;
           $.ajax({
             url: urlItem,
             success: (result) =>{
@@ -63,8 +63,10 @@ constructor(props){
       }
     });
   }
-
-  shouldComponentUpdate(nextProps,nextState) {
+  componentDidMount(){
+    this.fetchData()
+  }
+  /*shouldComponentUpdate(nextProps,nextState) {
 
   if (this.state.year !== nextState.year || this.state.genre !== nextState.genre) {
     this.fetchData();
@@ -75,7 +77,7 @@ constructor(props){
     }
   }
   return false
-}
+}*/
 
   render(){
     //const { genre, year } = this.state;
@@ -87,10 +89,10 @@ constructor(props){
                 apikey={apikey} source="movies" />
         <div className="list">
           {this.state.movieList.map((result) =>{
-            return (<ItemList key={result.id} title={result.title} raiting={result.vote_average}
-                              duration={result.runtime} seasonsOrDate={result.release_date}
-                              episodiesOrGenre={result.genre} overview={result.overview}
-                              posterSrc={result.posterSrc} source="movies" />);
+            return (<ItemList key={result.id} title={result.name} raiting={result.vote_average}
+                              duration={result.episode_run_time[0]} seasonsOrDate={result.number_of_seasons}
+                              episodiesOrGenre={result.number_of_episodes} overview={result.overview}
+                              posterSrc={result.posterSrc} source="series" />);
           })}
         </div>
       </div>
@@ -98,4 +100,4 @@ constructor(props){
   }
 }
 
-export default Movies;
+export default Series;

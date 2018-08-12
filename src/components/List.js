@@ -9,27 +9,30 @@ class List extends React.Component {
   constructor(props) {
     super(props);
     this.state  = {
+      itemsList: []
     }
     this.fetchData = this.fetchData.bind(this);
   }
 
 fetchData(){
+
   const { urlBase, endpoint, apikey, year, genre, endpointItem } = this.props;
   const urlString = urlBase + endpoint + "?api_key=" + apikey+ "&primary_release_year=" + year +"&with_genres="+genre;
   var itemRows = []
   $.ajax({
     url:urlString,
     success: (searchResult) => {
+      console.log(searchResult)
       searchResult.results.forEach((item) =>{
         const urlItem = urlBase + endpointItem + item.id + "?api_key=" + apikey;
         $.ajax({
           url: urlItem,
           success: (result) =>{
             const findGenre = result.genres.find( g => g.id == genre);
+            result.genre = findGenre.name;
+            result.posterSrc = "http://image.tmdb.org/t/p/w185" + result.poster_path;
 
-            const itemRow = <ItemList title={result.title} raiting={result.vote_average}
-                              duration={result.runtime} seasonsOrDate={result.release_date}
-                              episodiesOrGenre={findGenre.name} overview={result.overview} />
+            const itemRow = result
             itemRows.push(itemRow);
           },
           error: (xhr, status,err) => {
@@ -37,7 +40,6 @@ fetchData(){
           }
         });
       });
-
       this.setState({itemsList: itemRows});
     },
     error: (xhr, status,err) => {
@@ -47,11 +49,14 @@ fetchData(){
 }
   render(){
 
-    this.fetchData();
-
     return(
       <div className="list">
-          {this.state.itemsList}
+        {this.state.itemsList.map((result) =>{
+          return (<ItemList key={result.id} title={result.title} raiting={result.vote_average}
+                            duration={result.runtime} seasonsOrDate={result.release_date}
+                            episodiesOrGenre={result.genre} overview={result.overview}
+                            posterSrc={result.posterSrc} />);
+        })}
       </div>
 
     );
