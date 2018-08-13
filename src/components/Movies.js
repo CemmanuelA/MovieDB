@@ -1,5 +1,4 @@
 import React from 'react';
-import $ from 'jquery';
 
 import Filter from './Filter';
 import ItemList from './ItemList';
@@ -47,8 +46,7 @@ constructor(props){
       })
       Promise.all(promises).then(all => {
         all.forEach(result => {
-          console.log(result);
-          const findGenre = result.genres.find( g => g.id == genre);
+          const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
           result.genre = (findGenre !== undefined ) ? findGenre.name : 'no genre' ;
           result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
 
@@ -63,7 +61,6 @@ constructor(props){
 
   addToFavorites( pos ){
     const movie = this.state.movieList[pos];
-    console.log(movie)
     movie.source = 'movies'
     var favorites = localStorage.getItem('favorites');
     if(!favorites)
@@ -71,7 +68,7 @@ constructor(props){
     const parsedFavs = JSON.parse(favorites);
     const favsArray = [...parsedFavs, movie];
     localStorage.setItem('favorites',JSON.stringify(favsArray));
-    
+
   }
 
   componentDidMount(){
@@ -80,7 +77,6 @@ constructor(props){
   componentDidUpdate(prevProps, prevState){
 
     if(this.state.year != prevState.year || this.state.genre != prevState.genre){
-      console.log(this.state)
       this.fetchData();
     };
   }
@@ -97,7 +93,10 @@ constructor(props){
             return (<ItemList key={result.id} title={result.title} raiting={result.vote_average}
                               duration={result.runtime} seasonsOrDate={result.release_date}
                               episodiesOrGenre={result.genre} overview={result.overview}
-                              posterSrc={result.posterSrc} source="movies" addToFav={() => { this.addToFavorites(i)}} />);
+                              posterSrc={result.posterSrc} source="movies"
+                              addToFav={() => { this.addToFavorites(i)}}
+                              videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
+                            />);
           })}
         </div>
       </div>

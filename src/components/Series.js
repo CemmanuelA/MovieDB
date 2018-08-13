@@ -1,6 +1,4 @@
 import React from 'react';
-import $ from 'jquery';
-
 import Filter from './Filter';
 import ItemList from './ItemList';
 
@@ -35,38 +33,48 @@ constructor(props){
 
       const { urlBase, apikey } = this.props;
       const { year, genre } = this.state;
-      const urlString = urlBase + endpoint + "?api_key=" + apikey+ "&primary_release_year=" + year +"&with_genres="+genre;
+      const urlString = urlBase + endpoint + "?api_key=" + apikey+ "&first_air_date_year=" + year +"&with_genres="+genre;
       const itemRows = [];
       const promises = [];
-  
+
       fetch(urlString)
       .then(res => res.json() )
       .then((series) => {
         series.results.forEach((item ) => {
-          const urlItem = urlBase + "/tv/" + item.id + "?api_key=" + apikey;
+          const urlItem = urlBase + "/tv/" + item.id + "?api_key=" + apikey + "&append_to_response=videos";
           promises.push(fetch(urlItem).then(res => res.json()));
         })
         Promise.all(promises).then(all => {
           all.forEach(result => {
-            /* const findGenre = result.genres.find( g => g.id == genre);
-            result.genre = (findGenre  !== undefined) ? findGenre.name : 'no gender'; */
+            const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
+            result.genre = (findGenre  !== undefined) ? findGenre.name : 'no gender';
             result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
-  
+
             const itemRow = result
             itemRows.push(itemRow)
           });
           this.setState({serieList: itemRows});
         });
-  
+
       })
   }
 
   addToFavorites( pos ){
-    const serie = this.state.movieList[pos];
+    //Get object with the serie information
+    const serie = this.state.serieList[pos];
+    // Add the source of the favorite item
     serie.source = 'series'
+    //get fav array from local storage
     var favorites = localStorage.getItem('favorites');
-    localStorage.setItem('favorites',[...favorites, serie])
-    
+    if(!favorites)
+      favorites = "[]";
+    // Parse favorite from string to array
+    const parsedFavs = JSON.parse(favorites);
+    //Add the serie to the array
+    const favsArray = [...parsedFavs, serie];
+   //transform the array to string and add to local storage
+    localStorage.setItem('favorites',JSON.stringify(favsArray));
+
   }
 
   componentDidMount(){
@@ -75,25 +83,26 @@ constructor(props){
   componentDidUpdate(prevProps, prevState){
 
     if(this.state.year != prevState.year || this.state.genre != prevState.genre){
-      console.log(this.state)
+
       this.fetchData();
     };
   }
 
   render(){
-    //const { genre, year } = this.state;
     const { urlBase, apikey } = this.props;
-    console.log(this.state.movieList, 'jkadsfjds')
     return(
       <div>
         <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
                 apikey={apikey} source="movies" />
         <div className="list">
-          {this.state.serieList.map((result) =>{
+          {this.state.serieList.map((result, i) =>{
             return (<ItemList key={result.id} title={result.name} raiting={result.vote_average}
                               duration={result.episode_run_time[0]} seasonsOrDate={result.number_of_seasons}
                               episodiesOrGenre={result.number_of_episodes} overview={result.overview}
-                              posterSrc={result.posterSrc} source="series" />);
+                              posterSrc={result.posterSrc} source="series"
+                              addToFav={() => { this.addToFavorites(i)}}
+                              videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
+                            />);
           })}
         </div>
       </div>

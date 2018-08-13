@@ -1,6 +1,8 @@
 import React from 'react';
 import Select from 'react-select';
 import $ from 'jquery';
+
+
 const options  = [
   {value:'Action', label:'Action'},
   {value:'Adventure', label:'Adventure'},
@@ -19,7 +21,7 @@ class Filter extends React.Component{
     super(props);
     this.state = {
       selectedOption: options[0],
-      year:''
+      year:'2018'
     }
 
     this.handleSelectedChange = this.handleSelectedChange.bind(this);
@@ -30,22 +32,27 @@ class Filter extends React.Component{
   handleSelectedChange(selectedOption) {
     this.setState({selectedOption});
     const { source, urlBase, apikey } = this.props;
-    const endPoint = (source === "movies") ? endpointMovies : endpointSeries;
-    const urlString = urlBase + endPoint +"?api_key=" + apikey;
-    $.ajax({
-      url:urlString,
-      success: (result) =>{
-        result.genres.forEach((gender) =>{
-          if(gender.name.indexOf(selectedOption.value) > -1){
-            this.props.handleSelectOption(gender.id);
-          }
+    if( source !== 'favorites'){
+      const endPoint = (source === "movies") ? endpointMovies : endpointSeries;
+      const urlString = urlBase + endPoint +"?api_key=" + apikey;
+      $.ajax({
+        url:urlString,
+        success: (result) =>{
+          result.genres.forEach((gender) =>{
+            if(gender.name.indexOf(selectedOption.value) > -1){
+              this.props.handleSelectOption(gender.id);
+            }
 
-        });
-      },
-      error: (xhr,status,err) => {
-        console.error('Something was wrong fetching the genders' + err)
-      }
-    });
+          });
+        },
+        error: (xhr,status,err) => {
+          console.error('Something was wrong fetching the genders' + err)
+        }
+      });
+    }else{
+      this.props.handleSelectOption(selectedOption.value);
+    }
+
   }
   handleYearChange(event) {
     const name = event.target.name;
@@ -58,7 +65,7 @@ class Filter extends React.Component{
       return(
         <div className="filter">
           <div>
-            <p>Año</p>
+            <p>Year</p>
             <input type="text"
               value={this.state.year}
               name="year"
@@ -66,7 +73,7 @@ class Filter extends React.Component{
               />
           </div>
           <div>
-            <p>Género</p>
+            <p>Genre</p>
             <Select
               value={this.state.selectedOption}
               onChange={(option)=>this.handleSelectedChange(option)}

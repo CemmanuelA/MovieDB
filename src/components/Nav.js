@@ -7,9 +7,10 @@ const Nav = () => {
     <div className="navContainer">
       <ul className="nav">
         <li> <img className="logo" src="assets/logo.png" /> </li>
-        <li><Link to='/movies'> Movies </Link></li>
-        <li><Link to='/series'> Series </Link></li>
-        <li>Favorites</li>
+        <li style={{float: 'right'}}><Link to='/favorites'> Favorites </Link></li>
+        <li style={{float: 'right'}}><Link to='/series'> Series </Link></li>
+        <li style={{float: 'right'}}><Link to='/movies'> Movies </Link></li>
+
       </ul>
     </div>
   );
