@@ -20,6 +20,8 @@ constructor(props){
   this.handleYear = this.handleYear.bind(this);
   this.handleSelectOption = this.handleSelectOption.bind(this);
   this.fetchData = this.fetchData.bind(this);
+  this.addTofavorites = this.addToFavorites.bind(this);
+
 }
   handleYear(year){
     this.setState({year:year});
@@ -30,67 +32,72 @@ constructor(props){
   }
 
   fetchData(){
-
     const { urlBase, apikey } = this.props;
     const { year, genre } = this.state;
     const urlString = urlBase + endpoint + "?api_key=" + apikey+ "&primary_release_year=" + year +"&with_genres="+genre;
-    var itemRows = []
-    $.ajax({
-      url:urlString,
-      success: (searchResult) => {
-        console.log(searchResult)
-        searchResult.results.forEach((item) =>{
-          const urlItem = urlBase + "/movie/" + item.id + "?api_key=" + apikey;
-          $.ajax({
-            url: urlItem,
-            success: (result) =>{
-              const findGenre = result.genres.find( g => g.id == genre);
-              result.genre = findGenre.name;
-              result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
+    const itemRows = [];
+    const promises = [];
 
-              const itemRow = result
-              itemRows.push(itemRow);
-            },
-            error: (xhr, status,err) => {
-              console.error('Something was wrong fetching the item id' + err);
-            }
-          });
+    fetch(urlString)
+    .then(res => res.json() )
+    .then((movies) => {
+      movies.results.forEach((item ) => {
+        const urlItem = urlBase + "/movie/" + item.id + "?api_key=" + apikey + "&append_to_response=videos";
+        promises.push(fetch(urlItem).then(res => res.json()));
+      })
+      Promise.all(promises).then(all => {
+        all.forEach(result => {
+          console.log(result);
+          const findGenre = result.genres.find( g => g.id == genre);
+          result.genre = (findGenre !== undefined ) ? findGenre.name : 'no genre' ;
+          result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
+
+          const itemRow = result
+          itemRows.push(itemRow)
         });
         this.setState({movieList: itemRows});
-      },
-      error: (xhr, status,err) => {
-        console.error('Something was wrong fetching the items' + err);
-      }
-    });
+      });
+
+    })
   }
 
-  shouldComponentUpdate(nextProps,nextState) {
+  addToFavorites( pos ){
+    const movie = this.state.movieList[pos];
+    console.log(movie)
+    movie.source = 'movies'
+    var favorites = localStorage.getItem('favorites');
+    if(!favorites)
+      favorites = "[]";
+    const parsedFavs = JSON.parse(favorites);
+    const favsArray = [...parsedFavs, movie];
+    localStorage.setItem('favorites',JSON.stringify(favsArray));
+    
+  }
 
-  if (this.state.year !== nextState.year || this.state.genre !== nextState.genre) {
+  componentDidMount(){
     this.fetchData();
-    return true;
-  }else{
-    if(this.state.movieList !== nextState.movieList){
-      return true;
-    }
   }
-  return false
-}
+  componentDidUpdate(prevProps, prevState){
+
+    if(this.state.year != prevState.year || this.state.genre != prevState.genre){
+      console.log(this.state)
+      this.fetchData();
+    };
+  }
 
   render(){
     //const { genre, year } = this.state;
     const { urlBase, apikey } = this.props;
-    console.log(this.state.movieList, 'jkadsfjds')
     return(
       <div>
         <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
                 apikey={apikey} source="movies" />
         <div className="list">
-          {this.state.movieList.map((result) =>{
+          {this.state.movieList.map((result, i) =>{
             return (<ItemList key={result.id} title={result.title} raiting={result.vote_average}
                               duration={result.runtime} seasonsOrDate={result.release_date}
                               episodiesOrGenre={result.genre} overview={result.overview}
-                              posterSrc={result.posterSrc} source="movies" />);
+                              posterSrc={result.posterSrc} source="movies" addToFav={() => { this.addToFavorites(i)}} />);
           })}
         </div>
       </div>

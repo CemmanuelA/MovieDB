@@ -4,7 +4,7 @@ import React from 'react';
 class ItemList extends React.Component {
   render(){
 
-    const { title, raiting, duration, seasonsOrDate, episodiesOrGenre, overview, posterSrc, source } = this.props;
+    const { title, raiting, duration, seasonsOrDate, episodiesOrGenre, overview, posterSrc, source, addToFav} = this.props;
 
     return(
       <div className="itemList">
@@ -25,7 +25,7 @@ class ItemList extends React.Component {
             <p>{overview}}</p>
             <div className="buttonContainer">
               <button className="btnTrailer">Watch trailer</button>
-              <div className="favorite">
+              <div className="favorite" onClick={ addToFav }>
                 <p>Add to favorites</p>
                 <img alt="heart" src="assets/favorite.png"/>
               </div>
