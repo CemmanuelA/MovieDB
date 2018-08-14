@@ -18,7 +18,7 @@ class ItemList extends React.Component {
   render(){
 
     const { title, raiting, duration, seasonsOrDate,
-      episodiesOrGenre, overview, posterSrc, source, addToFav, videoId} = this.props;
+      episodiesOrGenre, overview, posterSrc, source, addToFav, videoId, sourceComponent} = this.props;
 
     return(
       <div className="itemList">
@@ -32,7 +32,7 @@ class ItemList extends React.Component {
               <p>{raiting}</p>
             </div>
             <div className="importantDetails">
-                <p>{(duration != null ? duration +" m" : "undefined") }</p>
+                <p>{(duration != null) ? duration +" m" : "undefined" }</p>
                 <p>{(source == 'movies') ? seasonsOrDate : seasonsOrDate + ' seasons' }</p>
                 <p>{(source == 'movies' ) ? episodiesOrGenre : episodiesOrGenre + ' episodies' }</p>
             </div>
@@ -40,13 +40,15 @@ class ItemList extends React.Component {
             <div className="buttonContainer">
               <ModalVideo channel='youtube' isOpen={this.state.isOpen} videoId={videoId} onClose={() => this.setState({isOpen: false})} />
               <button className="btnTrailer" onClick={() => this.openModal()}>Watch trailer</button>
-              {(source !== 'favorites') ?
+              {(sourceComponent != 'favorites') ?
               <div className="favorite" onClick={ addToFav }>
                 <p>Add to favorites</p>
                 <img alt="heart" src="assets/favorite.png"/>
               </div>
               :
-              <div></div>  }
+              <div className="favorite" >
+                <p>Remove from favorites</p>
+              </div>  }
             </div>
           </div>
       </div>

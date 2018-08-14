@@ -86,6 +86,7 @@ constructor(props){
                                 episodiesOrGenre={(result.source === 'movies') ? result.genre : result.number_of_episodes}
                                 overview={result.overview}
                                 posterSrc={result.posterSrc} source={result.source}
+                                sourceComponent='favorites'
                                 videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
                               />);
             })}

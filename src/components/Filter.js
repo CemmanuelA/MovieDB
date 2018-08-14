@@ -1,6 +1,5 @@
 import React from 'react';
 import Select from 'react-select';
-import $ from 'jquery';
 
 
 const options  = [
@@ -35,19 +34,14 @@ class Filter extends React.Component{
     if( source !== 'favorites'){
       const endPoint = (source === "movies") ? endpointMovies : endpointSeries;
       const urlString = urlBase + endPoint +"?api_key=" + apikey;
-      $.ajax({
-        url:urlString,
-        success: (result) =>{
-          result.genres.forEach((gender) =>{
-            if(gender.name.indexOf(selectedOption.value) > -1){
-              this.props.handleSelectOption(gender.id);
-            }
-
-          });
-        },
-        error: (xhr,status,err) => {
-          console.error('Something was wrong fetching the genders' + err)
-        }
+      fetch(urlString)
+      .then( res => res.json())
+      .then((element) =>{
+        element.genres.forEach( genre => {
+          if(genre.name.indexOf(selectedOption.value) > -1){
+            this.props.handleSelectOption(genre.id);
+          }
+        });
       });
     }else{
       this.props.handleSelectOption(selectedOption.value);

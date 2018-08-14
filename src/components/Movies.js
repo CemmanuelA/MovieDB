@@ -61,13 +61,18 @@ constructor(props){
 
   addToFavorites( pos ){
     const movie = this.state.movieList[pos];
-    movie.source = 'movies'
+    movie.source = 'movies';
     var favorites = localStorage.getItem('favorites');
     if(!favorites)
       favorites = "[]";
+
     const parsedFavs = JSON.parse(favorites);
-    const favsArray = [...parsedFavs, movie];
-    localStorage.setItem('favorites',JSON.stringify(favsArray));
+    if(!parsedFavs.find(elem => {
+      return elem.id === movie.id
+    })) {
+      const favsArray = [...parsedFavs, movie];
+      localStorage.setItem('favorites',JSON.stringify(favsArray));
+    }
 
   }
 
@@ -84,23 +89,32 @@ constructor(props){
   render(){
     //const { genre, year } = this.state;
     const { urlBase, apikey } = this.props;
-    return(
-      <div>
-        <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
-                apikey={apikey} source="movies" />
-        <div className="list">
-          {this.state.movieList.map((result, i) =>{
-            return (<ItemList key={result.id} title={result.title} raiting={result.vote_average}
-                              duration={result.runtime} seasonsOrDate={result.release_date}
-                              episodiesOrGenre={result.genre} overview={result.overview}
-                              posterSrc={result.posterSrc} source="movies"
-                              addToFav={() => { this.addToFavorites(i)}}
-                              videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
-                            />);
-          })}
+    if(this.state.movieList.length > 0) {
+      return(
+        <div>
+          <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
+                  apikey={apikey} source="movies" />
+          <div className="list">
+            {this.state.movieList.map((result, i) =>{
+              return (<ItemList key={result.id} title={result.title || 'undefined'} raiting={result.vote_average || 'undefined'}
+                                duration={result.runtime || 'undefined'} seasonsOrDate={result.release_date || 'undefined'}
+                                episodiesOrGenre={result.genre} overview={result.overview || 'undefined'}
+                                posterSrc={result.posterSrc} source="movies"
+                                sourceComponent='movies'
+                                addToFav={() => { this.addToFavorites(i)}}
+                                videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
+                              />);
+            })}
+          </div>
         </div>
-      </div>
-    )
+      );
+    }else{
+      return(<div>
+              <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
+                      apikey={apikey} source="movies" />
+              <div>Sorry no movies were found related to these criterias</div>
+            </div>);
+    }
   }
 }
 

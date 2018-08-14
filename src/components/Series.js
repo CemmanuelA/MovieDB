@@ -70,10 +70,15 @@ constructor(props){
       favorites = "[]";
     // Parse favorite from string to array
     const parsedFavs = JSON.parse(favorites);
-    //Add the serie to the array
-    const favsArray = [...parsedFavs, serie];
-   //transform the array to string and add to local storage
-    localStorage.setItem('favorites',JSON.stringify(favsArray));
+    //Find if the serie exitsa
+    if(!parsedFavs.find(elem => {
+      return elem.id === serie.id
+    })) {
+      //Add the serie to the array
+      const favsArray = [...parsedFavs, serie];
+     //transform the array to string and add to local storage
+      localStorage.setItem('favorites',JSON.stringify(favsArray));
+  }
 
   }
 
@@ -90,23 +95,32 @@ constructor(props){
 
   render(){
     const { urlBase, apikey } = this.props;
-    return(
-      <div>
-        <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
-                apikey={apikey} source="movies" />
-        <div className="list">
-          {this.state.serieList.map((result, i) =>{
-            return (<ItemList key={result.id} title={result.name} raiting={result.vote_average}
-                              duration={result.episode_run_time[0]} seasonsOrDate={result.number_of_seasons}
-                              episodiesOrGenre={result.number_of_episodes} overview={result.overview}
-                              posterSrc={result.posterSrc} source="series"
-                              addToFav={() => { this.addToFavorites(i)}}
-                              videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
-                            />);
-          })}
+    if(this.state.serieList.length > 0){
+      return(
+        <div>
+          <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
+                  apikey={apikey} source="movies" />
+          <div className="list">
+            {this.state.serieList.map((result, i) =>{
+              return (<ItemList key={result.id} title={result.name || 'undefined'} raiting={result.vote_average || 'undefined'}
+                                duration={result.episode_run_time[0]  || 'undefined'} seasonsOrDate={result.number_of_seasons || 'undefined'}
+                                episodiesOrGenre={result.number_of_episodes || 'undefined'} overview={result.overview || 'undefined'}
+                                posterSrc={result.posterSrc} source="series"
+                                sourceComponent='series'
+                                addToFav={() => { this.addToFavorites(i)}}
+                                videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
+                              />);
+            })}
+          </div>
         </div>
-      </div>
-    )
+      )
+    }else{
+      return(<div>
+                <Filter handleYear={this.handleYear} handleSelectOption={this.handleSelectOption} urlBase={urlBase}
+                  apikey={apikey} source="movies" />
+                <div>Sorry no series were found related to these criterias</div>
+            </div>);
+    }
   }
 }
 
