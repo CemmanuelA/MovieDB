@@ -10,6 +10,7 @@ import Favorites from './components/Favorites';
 
 const apiKey = "a3d4120ff3a44697a45534cc8f042761";
 const urlBase = "https://api.themoviedb.org/3";
+var query = "";
 
 const movieComponent = (props) =>{
   return(
@@ -17,6 +18,7 @@ const movieComponent = (props) =>{
     {...props}
     urlBase={urlBase}
     apikey={apiKey}
+    query={query}
     />
   )
 }
@@ -38,12 +40,28 @@ const favoriteComponent = (props) =>{
   )
 }
 class App extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      query: '',
+    }
+
+    this.handleQuery = this.handleQuery.bind(this);
+  }
+
+  handleQuery(Q){
+      this.setState({query});
+      query = query + Q;
+  }
+
+
   render() {
     return (
       <Router>
         <div>
             <Nav />
-            <Search />
+            <Search handleQuery={this.handleQuery}/>
             <p style= {{paddingLeft: 10}}> Discover new movies and tv shows </p>
             <Switch>
               <Redirect exact from='/' to='/movies' />

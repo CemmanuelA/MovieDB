@@ -87,7 +87,7 @@ constructor(props){
   }
 
   render(){
-    //const { genre, year } = this.state;
+    console.log(this.props.query,"si funciona")
     const { urlBase, apikey } = this.props;
     if(this.state.movieList.length > 0) {
       return(
