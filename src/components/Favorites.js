@@ -17,6 +17,7 @@ constructor(props){
   }
   this.handleYear = this.handleYear.bind(this);
   this.handleSelectOption = this.handleSelectOption.bind(this);
+  this.handleSearch = this.handleSearch.bind(this);
   this.handleFilter = this.handleFilter.bind(this);
 }
   handleYear(year){
@@ -27,31 +28,63 @@ constructor(props){
     this.setState({genre});
   }
 
-  handleFilter() {
-    const { year, genre,favoriteList } = this.state;
+  handleSearch() {
+    const { favoriteList } = this.state;
+    const { query } = this.props;
     const newFilterList = [];
     favoriteList.forEach( (fav) =>{
-      if(year === ''){
-        if(fav.genre.indexOf(genre) > -1) {
-          newFilterList.push(fav);
-        }
+      if(query === ''){
+        const favItem = this.handleFilter(fav);
+        if(Object.keys(favItem).length > 0)
+          newFilterList.push(favItem);
       }else{
         if(fav.source === 'movies'){
-          if(fav.release_date.indexOf(year) > -1 && fav.genre.indexOf(genre) > -1){
-              newFilterList.push(fav);
+          if(fav.title.toLowerCase().search(query.toLowerCase()) > -1
+              || fav.overview.toLowerCase().search(query.toLowerCase()) > -1){
+            const favItem = this.handleFilter(fav);
+            if(Object.keys(favItem).length > 0)
+              newFilterList.push(favItem);
           }
-        }else{
+        }else {
           if(fav.source === 'series'){
-            if(fav.first_air_date.indexOf(year) > -1 && fav.genre.indexOf(genre) > -1){
-                newFilterList.push(fav);
+            if(fav.name.toLowerCase().search(query.toLocaleLowerCase()) > -1
+                || fav.overview.toLowerCase().search(query.toLowerCase()) > -1){
+              const favItem = this.handleFilter(fav);
+              if(Object.keys(favItem).length > 0)
+                newFilterList.push(favItem);;
+
             }
           }
         }
       }
-    });
 
+    });
     this.setState({filterList: newFilterList});
   }
+
+  handleFilter(fav){
+    const {year, genre} = this.state;
+    if(year === ''){
+      if(fav.genre.indexOf(genre) > -1) {
+        return  fav;
+      }
+    }else{
+        if(fav.source === 'movies'){
+          if(fav.release_date.indexOf(year) > -1 && fav.genre.indexOf(genre) > -1){
+              return  fav;
+            }
+        }else{
+          if(fav.source === 'series'){
+            if(fav.first_air_date.indexOf(year) > -1 && fav.genre.indexOf(genre) > -1){
+              return  fav;
+            }
+          }
+        }
+    }
+  }
+
+
+
 
   componentDidMount() {
     var favorites = localStorage.getItem('favorites');
@@ -63,9 +96,10 @@ constructor(props){
   }
 
   componentDidUpdate(prevProps, prevState){
-    if(this.state.year != prevState.year || this.state.genre != prevState.genre){
+    if(this.state.year != prevState.year || this.state.genre != prevState.genre
+      || this.props.query != prevProps.query){
 
-      this.handleFilter();
+      this.handleSearch();
     };
 
   }
@@ -79,16 +113,16 @@ constructor(props){
                   source="favorites" />
           <div className="list">
             {this.state.filterList.map((result) =>{
-              console.log(result);
-              return (<ItemList key={result.id} title={result.name} raiting={result.vote_average}
-                                duration={(result.source === 'movies') ? result.runtime : result.episode_run_time[0]}
-                                seasonsOrDate={(result.source === 'movies') ? result.release_date : result.number_of_seasons}
-                                episodiesOrGenre={(result.source === 'movies') ? result.genre : result.number_of_episodes}
-                                overview={result.overview}
-                                posterSrc={result.posterSrc} source={result.source}
-                                sourceComponent='favorites'
-                                videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
-                              />);
+              return (<ItemList key={result.id} title={(result.source === 'series') ? result.name : result.title}
+                        raiting={result.vote_average}
+                        duration={(result.source === 'movies') ? result.runtime : result.episode_run_time[0]}
+                        seasonsOrDate={(result.source === 'movies') ? result.release_date : result.number_of_seasons}
+                        episodiesOrGenre={(result.source === 'movies') ? result.genre : result.number_of_episodes}
+                        overview={result.overview}
+                        posterSrc={result.posterSrc} source={result.source}
+                        sourceComponent='favorites'
+                        videoId={(result.videos.results.length > 0) ? result.videos.results[0].key : 'L61p2uyiMSo'}
+                      />);
             })}
           </div>
         </div>

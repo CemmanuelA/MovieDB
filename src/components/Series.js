@@ -3,7 +3,8 @@ import Filter from './Filter';
 import ItemList from './ItemList';
 
 
-const endpoint = "/discover/tv"
+const endpointSearch = "/search/tv";
+const endpointDiscover = "/discover/tv";
 
 class Series extends React.Component {
 
@@ -31,12 +32,16 @@ constructor(props){
 
     fetchData(){
 
-      const { urlBase, apikey } = this.props;
+      const { urlBase, apikey, query } = this.props;
       const { year, genre } = this.state;
-      const urlString = urlBase + endpoint + "?api_key=" + apikey+ "&first_air_date_year=" + year +"&with_genres="+genre;
       const itemRows = [];
       const promises = [];
-
+      let urlString;
+      if(query != ''){
+        urlString = urlBase + endpointSearch + "?api_key=" + apikey+ "&first_air_date_year=" + year +"&query="+query;
+      }else{
+        urlString = urlBase + endpointDiscover + "?api_key=" + apikey+ "&first_air_date_year=" + year +"&with_genres="+genre;
+      }
       fetch(urlString)
       .then(res => res.json() )
       .then((series) => {
@@ -47,11 +52,12 @@ constructor(props){
         Promise.all(promises).then(all => {
           all.forEach(result => {
             const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
-            result.genre = (findGenre  !== undefined) ? findGenre.name : 'no gender';
-            result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
-
-            const itemRow = result
-            itemRows.push(itemRow)
+            if(findGenre !== undefined){
+              result.genre = findGenre.name;
+              result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
+              const itemRow = result;
+              itemRows.push(itemRow);
+            }
           });
           this.setState({serieList: itemRows});
         });
@@ -87,7 +93,8 @@ constructor(props){
   }
   componentDidUpdate(prevProps, prevState){
 
-    if(this.state.year != prevState.year || this.state.genre != prevState.genre){
+    if(this.state.year != prevState.year || this.state.genre != prevState.genre
+    || this.props.query != prevProps.query){
 
       this.fetchData();
     };

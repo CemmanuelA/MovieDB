@@ -28,6 +28,7 @@ const serieComponent = (props) =>{
     {...props}
     urlBase={urlBase}
     apikey={apiKey}
+    query={query}
     />
   )
 }
@@ -36,6 +37,7 @@ const favoriteComponent = (props) =>{
   return(
     <Favorites
     {...props}
+    query={query}
     />
   )
 }
@@ -52,7 +54,7 @@ class App extends Component {
 
   handleQuery(Q){
       this.setState({query});
-      query = query + Q;
+      query = Q;
   }
 
 

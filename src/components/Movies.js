@@ -4,7 +4,8 @@ import Filter from './Filter';
 import ItemList from './ItemList';
 
 
-const endpoint = "/discover/movie"
+const endpointSearch = "/search/movie"
+const endpointDiscover = "/discover/movie"
 
 class Movies extends React.Component {
 
@@ -31,11 +32,17 @@ constructor(props){
   }
 
   fetchData(){
-    const { urlBase, apikey } = this.props;
+    console.log('asdsd')
+    const { urlBase, apikey, query } = this.props;
     const { year, genre } = this.state;
-    const urlString = urlBase + endpoint + "?api_key=" + apikey+ "&primary_release_year=" + year +"&with_genres="+genre;
     const itemRows = [];
     const promises = [];
+    let urlString;
+    if(query != ''){
+      urlString = urlBase + endpointSearch + "?api_key=" + apikey+ "&primary_release_year=" + year +"&query=" + query ;
+    }else{
+      urlString = urlBase + endpointDiscover + "?api_key=" + apikey+ "&primary_release_year=" + year +"&with_genres=" + genre ;
+    };
 
     fetch(urlString)
     .then(res => res.json() )
@@ -47,11 +54,12 @@ constructor(props){
       Promise.all(promises).then(all => {
         all.forEach(result => {
           const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
-          result.genre = (findGenre !== undefined ) ? findGenre.name : 'no genre' ;
-          result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
-
-          const itemRow = result
-          itemRows.push(itemRow)
+          if(findGenre !== undefined){
+            result.genre =  findGenre.name;
+            result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
+            const itemRow = result;
+            itemRows.push(itemRow);
+          }
         });
         this.setState({movieList: itemRows});
       });
@@ -81,13 +89,13 @@ constructor(props){
   }
   componentDidUpdate(prevProps, prevState){
 
-    if(this.state.year != prevState.year || this.state.genre != prevState.genre){
+    if(this.state.year != prevState.year || this.state.genre != prevState.genre
+      || this.props.query != prevProps.query){
       this.fetchData();
     };
   }
 
   render(){
-    console.log(this.props.query,"si funciona")
     const { urlBase, apikey } = this.props;
     if(this.state.movieList.length > 0) {
       return(
