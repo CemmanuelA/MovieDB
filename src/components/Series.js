@@ -26,12 +26,11 @@ constructor(props){
 
   }
   handleSelectOption(genre) {
-    this.setState({genre});
+    this.setState({genre})
   }
 
 
     fetchData(){
-
       const { urlBase, apikey, query } = this.props;
       const { year, genre } = this.state;
       const itemRows = [];
@@ -49,20 +48,24 @@ constructor(props){
           const urlItem = urlBase + "/tv/" + item.id + "?api_key=" + apikey + "&append_to_response=videos";
           promises.push(fetch(urlItem).then(res => res.json()));
         })
-        Promise.all(promises).then(all => {
-          all.forEach(result => {
-            const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
-            if(findGenre !== undefined){
-              result.genre = findGenre.name;
-              result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
-              const itemRow = result;
-              itemRows.push(itemRow);
-            }
+        if(promises.length > 0){
+          Promise.all(promises).then(all => {
+            all.forEach(result => {
+              const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
+              if(findGenre !== undefined){
+                result.genre = findGenre.name;
+                result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
+                const itemRow = result;
+                itemRows.push(itemRow);
+              }
+            });
+            this.setState({serieList: itemRows});
           });
-          this.setState({serieList: itemRows});
-        });
-
+        };
       })
+      .catch(error => {
+        console.log(`hubo un problema ${error}`);
+      });
   }
 
   addToFavorites( pos ){

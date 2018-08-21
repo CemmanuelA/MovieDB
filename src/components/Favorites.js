@@ -33,25 +33,34 @@ constructor(props){
     const { query } = this.props;
     const newFilterList = [];
     favoriteList.forEach( (fav) =>{
+      console.log(fav,'fav');
       if(query === ''){
         const favItem = this.handleFilter(fav);
-        if(Object.keys(favItem).length > 0)
-          newFilterList.push(favItem);
+        if(favItem !== undefined){
+          if(Object.keys(favItem).length > 0)
+            newFilterList.push(favItem);
+        }
       }else{
         if(fav.source === 'movies'){
           if(fav.title.toLowerCase().search(query.toLowerCase()) > -1
               || fav.overview.toLowerCase().search(query.toLowerCase()) > -1){
             const favItem = this.handleFilter(fav);
-            if(Object.keys(favItem).length > 0)
-              newFilterList.push(favItem);
+            console.log(favItem,'favItem');
+            if(favItem !== undefined){
+              if(Object.keys(favItem).length > 0)
+                newFilterList.push(favItem);
+            }
           }
         }else {
           if(fav.source === 'series'){
             if(fav.name.toLowerCase().search(query.toLocaleLowerCase()) > -1
                 || fav.overview.toLowerCase().search(query.toLowerCase()) > -1){
               const favItem = this.handleFilter(fav);
-              if(Object.keys(favItem).length > 0)
-                newFilterList.push(favItem);;
+              console.log(favItem,'favItem');
+              if(favItem !== undefined){
+                if(Object.keys(favItem).length > 0)
+                  newFilterList.push(favItem);
+              }
 
             }
           }
@@ -64,6 +73,7 @@ constructor(props){
 
   handleFilter(fav){
     const {year, genre} = this.state;
+    const empty = {};
     if(year === ''){
       if(fav.genre.indexOf(genre) > -1) {
         return  fav;

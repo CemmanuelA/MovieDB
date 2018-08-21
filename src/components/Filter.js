@@ -61,6 +61,7 @@ class Filter extends React.Component{
           <div>
             <p>Year</p>
             <input type="text"
+              className="year"
               value={this.state.year}
               name="year"
               onChange={(y)=>this.handleYearChange(y)}

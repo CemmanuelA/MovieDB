@@ -51,20 +51,25 @@ constructor(props){
         const urlItem = urlBase + "/movie/" + item.id + "?api_key=" + apikey + "&append_to_response=videos";
         promises.push(fetch(urlItem).then(res => res.json()));
       })
-      Promise.all(promises).then(all => {
-        all.forEach(result => {
-          const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
-          if(findGenre !== undefined){
-            result.genre =  findGenre.name;
-            result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
-            const itemRow = result;
-            itemRows.push(itemRow);
-          }
-        });
-        this.setState({movieList: itemRows});
-      });
-
+      if(promises.length > 0) {
+        Promise.all(promises).then(all => {
+          console.log(promises)
+            all.forEach(result => {
+              const findGenre = (result.genres != undefined) ? result.genres.find( g => g.id == genre) : undefined;
+              if(findGenre !== undefined){
+                result.genre =  findGenre.name;
+                result.posterSrc = "http://image.tmdb.org/t/p/w154" + result.poster_path;
+                const itemRow = result;
+                itemRows.push(itemRow);
+              }
+            });
+            this.setState({movieList: itemRows});
+        })
+      };
     })
+    .catch(error => {
+      console.log(`hubo un problema ${error}`);
+    });
   }
 
   addToFavorites( pos ){
